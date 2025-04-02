@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
-	"io"
+	r "github.com/Ferps53/httpfromtcp/internal/request"
 	"log"
 	"net"
-	"strings"
 )
 
 func main() {
@@ -26,45 +25,12 @@ func main() {
 
 		fmt.Println("Connection accepted")
 
-		channel := getLinesChannel(conn)
+		request, err := r.RequestFromReader(conn)
 
-		for line := range channel {
-			fmt.Println(line)
-		}
-	}
-}
+    if err != nil {
+      log.Fatal(err)
+    }
 
-func getLinesChannel(file io.ReadCloser) <-chan string {
-
-	channel := make(chan string)
-	go readLines(file, channel)
-
-	return channel
-}
-
-func readLines(file io.ReadCloser, channel chan string) {
-
-	defer close(channel)
-	fmt.Println("Connection closed")
-	var line string
-	for {
-		data := make([]byte, 8)
-		count, err := file.Read(data)
-
-		if err != nil {
-			if err == io.EOF {
-				channel <- line
-				return
-			}
-			log.Fatal(err)
-		}
-
-		parts := strings.Split(string(data[:count]), "\n")
-		line += parts[0]
-
-		if len(parts) == 2 {
-			channel <- line
-			line = parts[1]
-		}
+    fmt.Println(request.RequestLine)
 	}
 }
