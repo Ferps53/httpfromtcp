@@ -92,4 +92,29 @@ func TestParse(t *testing.T) {
 	assert.Equal(t, 24, n)
 	assert.False(t, done)
 
+  //Test: Multiple values
+	headers = NewHeaders()
+  data = []byte("Set-Test: test1" + crlf + crlf)
+	n, done, err = headers.Parse(data)
+	require.NoError(t, err)
+	require.NotNil(t, headers)
+	assert.Equal(t, "test1", headers["set-test"])
+	assert.Equal(t, 17, n)
+	assert.False(t, done)
+
+  data = []byte("Set-Test: test2" + crlf + crlf)
+	n, done, err = headers.Parse(data)
+	require.NoError(t, err)
+	require.NotNil(t, headers)
+	assert.Equal(t, "test1, test2", headers["set-test"])
+	assert.Equal(t, 17, n)
+	assert.False(t, done)
+
+  data = []byte("Set-Test: test3" + crlf + crlf)
+	n, done, err = headers.Parse(data)
+	require.NoError(t, err)
+	require.NotNil(t, headers)
+	assert.Equal(t, "test1, test2, test3", headers["set-test"])
+	assert.Equal(t, 17, n)
+	assert.False(t, done)
 }

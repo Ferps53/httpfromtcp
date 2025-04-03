@@ -18,9 +18,7 @@ func NewHeaders() Headers {
 func (header Headers) Parse(data []byte) (n int, done bool, err error) {
 
 	dataString := string(data)
-
 	dataString = strings.Trim(dataString, " ")
-
 	idx := strings.Index(dataString, crlf)
 
 	if idx == -1 {
@@ -32,10 +30,7 @@ func (header Headers) Parse(data []byte) (n int, done bool, err error) {
 	}
 
 	headerLine := strings.TrimSpace(dataString[:idx])
-
 	parts := strings.Split(headerLine, " ")
-
-	fmt.Println(parts[0] + "a")
 
 	if !strings.Contains(parts[0], ":") {
 		return 0, false, fmt.Errorf("Extra whitespace in header")
@@ -47,19 +42,33 @@ func (header Headers) Parse(data []byte) (n int, done bool, err error) {
 		return 0, false, fmt.Errorf("Len of key is less than one")
 	}
 
-  regex, err := regexp.Compile("[^A-Za-z1-9!#$%^&*+-_|~.`']")
+	regex, err := regexp.Compile("[^A-Za-z1-9!#$%^&*+-_|~.`']")
 
-  if err != nil {
-    log.Fatal(err)
-  }
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	key = strings.ToLower(key)
 
-  if regex.MatchString(key) {
-    return 0, false, fmt.Errorf("Key has invalid chars")
-  }
+	if regex.MatchString(key) {
+		return 0, false, fmt.Errorf("Key has invalid chars")
+	}
 
-	header[key] = parts[1]
+	curr, ok := header[key]
+
+	if !ok {
+		header[key] = parts[1]
+	} else {
+		fmt.Printf("Curr: %s\n", curr)
+		partsValue := []string{curr, parts[1]}
+
+		fmt.Println(partsValue)
+
+		header[key] = strings.Join(partsValue, ", ")
+
+		fmt.Println(header[key])
+
+	}
 
 	return idx + 2, false, nil
 }
